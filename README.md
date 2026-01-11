@@ -208,6 +208,14 @@ x = a ^ b ^ x;
 ```
 ~(n^m)&(n^m)+1 // returns 2^x where x is the position of the common bit (0 based)
 ```
+**Enumerate all submasks of n**
+```
+int s = n;
+while (s > 0) {
+ // you can use s here
+ s = (s-1) & n;
+}
+```
 ## Floats
 
 These are techniques inspired by the [fast inverse square root method.](https://en.wikipedia.org/wiki/Fast_inverse_square_root) Most of these
