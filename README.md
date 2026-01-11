@@ -359,6 +359,190 @@ B8 = (B5 << 3) | (B5 >> 2)
 ```
 Note: using anything other than the English letters will produce garbage results
 
+## Switching Algebra 
+
+**Read individual bits from an 8-bit register:**
+> [!NOTE]
+> Idea: Captures an 8-bit register value, and unmarshall it into individual bits based on a physical model for the conventional 8-bit register CMOS/TTL module. The trick is to combine the use of the logical Conjunction connective with the bitwise shifting to toggle individual bits. To better understand the algorithm, start solving the inner components first, then walk outwards out of the parentheses (e.g., `pregister->bit0 = (control_register & (1 << IEEE1284_PIN_0)) && IEEE1284_LOGIC_ON;` first, `(1 << IEEE1284_PIN_0)` selects the right bit by shifting a logical 1 to the bit location, then `control_register & bit_location` assigns the state for this bit by bitwise ANDing corresponding bits, and eventually assigns a logical state from the set of binary states `B = {0, 1}` using a logical AND operation.
+> 
+Example: 
+```c
+// Header definitions...
+#define IEEE1284_LOGIC_ON ((uint8_t)(0xFF))
+#define IEEE1284_LOGIC_OFF ((uint8_t)(0x00))
+
+#define IEEE1284_PIN_0 ((uint8_t)0b0)
+#define IEEE1284_PIN_1 ((uint8_t)0x01)
+#define IEEE1284_PIN_2 ((uint8_t)0x02)
+#define IEEE1284_PIN_3 ((uint8_t)0x03)
+#define IEEE1284_PIN_4 ((uint8_t)0x04)
+#define IEEE1284_PIN_5 ((uint8_t)0x05)
+#define IEEE1284_PIN_6 ((uint8_t)0x06)
+#define IEEE1284_PIN_7 ((uint8_t)0x07)
+...
+/**
+ * @brief Defines a physical model for an 8-bit register.
+ * this physical model holds a state from the set of logical
+ * binary states, B = {0, 1}.
+ *
+ * @default values are ZERO.
+ * 
+ * @note Any condition in which the user passes a number larger than zero,
+ * the algorithm converts it to 1, and otherwise zero.
+ */
+struct parport_register {
+    uint8_t bit0;
+    uint8_t bit1;
+    uint8_t bit2;
+    uint8_t bit3;
+    uint8_t bit4;
+    uint8_t bit5;
+    uint8_t bit6;
+    uint8_t bit7;
+    uint8_t memory;
+};
+...
+// source file definitions...
+__int8_t pport_read_controls(parport_module *pmodule, parport_register *pregister) {
+  if (pmodule == NULL || pmodule->fd < 0 || pregister == NULL) {
+    return 1;
+  }
+  uint8_t control_register = 0x00;
+  int value = ioctl(pmodule->fd, PPRCONTROL, &control_register);
+  if (value < 0) {
+    // leave the parport_register memory block without invoking any side effects!
+    // TODO-Invoke on-failure callback processors
+  } else {
+    // write the control values
+    // conversion of the bitwise values into logical values
+    pregister->bit0 = (control_register & (1 << IEEE1284_PIN_0)) && IEEE1284_LOGIC_ON;
+    pregister->bit1 = (control_register & (1 << IEEE1284_PIN_1)) && IEEE1284_LOGIC_ON;
+    pregister->bit2 = (control_register & (1 << IEEE1284_PIN_2)) && IEEE1284_LOGIC_ON;
+    pregister->bit3 = (control_register & (1 << IEEE1284_PIN_3)) && IEEE1284_LOGIC_ON;
+    pregister->bit4 = (control_register & (1 << IEEE1284_PIN_4)) && IEEE1284_LOGIC_ON;
+    pregister->bit5 = (control_register & (1 << IEEE1284_PIN_5)) && IEEE1284_LOGIC_ON;
+    pregister->bit6 = (control_register & (1 << IEEE1284_PIN_6)) && IEEE1284_LOGIC_ON;
+    pregister->bit7 = (control_register & (1 << IEEE1284_PIN_7)) && IEEE1284_LOGIC_ON;
+    pregister->memory = control_register;
+    // TODO-Invoke callback processors
+  }
+  return value;
+}
+```
+
+**Write individual bits on an 8-bit register:**
+> [!NOTE]
+> Idea: Uses a physical model for an 8-bit register CMOS/TTL module to capture binary states for individual bits (aka. Flip Flops), then passes them to the target register in a _write commanded operation_.
+> 
+Example: 
+```c
+// Header definitions...
+#define IEEE1284_LOGIC_ON ((uint8_t)(0xFF))
+#define IEEE1284_LOGIC_OFF ((uint8_t)(0x00))
+
+#define IEEE1284_PIN_0 ((uint8_t)0b0)
+#define IEEE1284_PIN_1 ((uint8_t)0x01)
+#define IEEE1284_PIN_2 ((uint8_t)0x02)
+#define IEEE1284_PIN_3 ((uint8_t)0x03)
+#define IEEE1284_PIN_4 ((uint8_t)0x04)
+#define IEEE1284_PIN_5 ((uint8_t)0x05)
+#define IEEE1284_PIN_6 ((uint8_t)0x06)
+#define IEEE1284_PIN_7 ((uint8_t)0x07)
+...
+/**
+ * @brief Defines a physical model for an 8-bit register.
+ * this physical model holds a state from the set of logical
+ * binary states, B = {0, 1}.
+ *
+ * @default values are ZERO.
+ * 
+ * @note Any condition in which the user passes a number larger than zero,
+ * the algorithm converts it to 1, and otherwise zero.
+ */
+struct parport_register {
+    uint8_t bit0;
+    uint8_t bit1;
+    uint8_t bit2;
+    uint8_t bit3;
+    uint8_t bit4;
+    uint8_t bit5;
+    uint8_t bit6;
+    uint8_t bit7;
+    uint8_t memory;
+};
+...
+// source file definitions...
+__int8_t pport_write_controls(parport_module *pmodule, parport_register *pregister) {
+  if (pmodule == NULL || pmodule->fd < 0 || pregister == NULL) {
+    return 1;
+  }
+  // conversion of the logical values to bitwise values
+  // first: convert the user values into strict logic values (i.e., ON or OFF) (Logic ANDing).
+  // second: bitwise left shift the converted logic values into its position in the register (Lshift).
+  // third: add the positioned bits together to build the register (Bitwise ORing).
+  // forth: write the byte to the control register (IO Commanding).
+  pregister->bit0 = (pregister->bit0 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_0;
+  pregister->bit1 = (pregister->bit1 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_1;
+  pregister->bit2 = (pregister->bit2 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_2;
+  pregister->bit3 = (pregister->bit3 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_3;
+  pregister->bit4 = (pregister->bit4 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_4;
+  pregister->bit5 = (pregister->bit5 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_5;
+  pregister->bit6 = (pregister->bit6 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_6;
+  pregister->bit7 = (pregister->bit7 && IEEE1284_LOGIC_ON) << IEEE1284_PIN_7;
+  // 
+  pregister->memory = pregister->bit0 | pregister->bit1 | pregister->bit2 | pregister->bit3 |
+                      pregister->bit4 | pregister->bit5 | pregister->bit6 | pregister->bit7;
+  // write the data to the register
+  int ret = ioctl(pmodule->fd, PPWCONTROL, &(pregister->memory));
+  // TODO-invoke callback processors here...
+  return ret;
+}
+```
+
+**Equivalent operator of switching XOR:**
+> [!NOTE]
+> Idea: Brainstorming around combinatorial digital circuit design by providing the equivalent circuitry for the XOR.
+> 
+Example:
+```c
+// Header definitions...
+#if !defined(SWITCHING_TYPE)
+#define SWITCHING_TYPE uint8_t
+#endif
+
+// Source file definitions...
+#include <electrostatic/electronetsoft/algorithm/arithmos/algebra/switching.h>
+#include <stdlib.h>
+
+uint8_t switching_xor(SWITCHING_TYPE **inputs, SWITCHING_TYPE *output){
+    if (inputs == NULL || output == NULL) {
+        return 1;
+    }
+    for (int i = 0; inputs[i] != NULL; i++) {
+        SWITCHING_TYPE prop0 = *output;
+        SWITCHING_TYPE prop1 = *(inputs[i]);
+        // XOR Propositional operation break-down
+        *output = ((!prop0) & prop1) | (prop0 & (!prop1));
+        //
+        // Example:
+        // 0 ^ 1 ^ 1 = 0
+        // -- break down -- 
+        // 1. [(!(0) & 1) | (0 & !(1)] = 1
+        // 2. [!(1) & 1) | (1 & !(1)] = 0
+        //
+        // XOR Function: Tests whether 2 binary sets are mutually exclusive
+        // return 1 if the predicate holds, 0 otherwise.
+        //
+        // Note: If the negation of set A can intersect with set B OR the negation
+        // of set B can intersect with set A; then, both sets are mutually exclusive.
+        //
+        // Note: This operates ONLY on binary sets (a set composed of only 0 or 1).
+        //
+    }
+    return 0;
+}
+```
+
 ## Additional Resources
 
 * [Bit Twiddling Hacks](https://graphics.stanford.edu/~seander/bithacks.html)
@@ -367,3 +551,5 @@ Note: using anything other than the English letters will produce garbage results
 * [The Bit Twiddler](http://bits.stephan-brumme.com/)
 * [Bitwise Operations in C - Gamedev.net](https://www.gamedev.net/articles/programming/general-and-gameplay-programming/bitwise-operations-in-c-r1563/)
 * [Bitwise Operators YouTube](https://www.youtube.com/results?search_query=bitwise+operators)
+* [IEEE-1284 Module Library for parallel port programming - The ElectroKIO Project](https://github.com/Electrostat-Lab/Electrostatic-Sandbox/blob/master/electrostatic-sandbox-framework/electrostatic-core/src/libs/electrostatic-primer/electroio/electrokio/ieee1284_module.c)
+* [Switching and Finite Automata Theory by Zvi Kohavi, Niraj K. Jha](https://www.amazon.com/Switching-Finite-Automata-Theory-Kohavi/dp/0521857481)
