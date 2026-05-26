@@ -1,10 +1,10 @@
 [package]
 name = "bitkit"
-version = "3.2.1"
+version = "3.2.2"
 edition = "2021"
 rust-version = "1.74"
 authors = ["Keon Kim <kwk236@gmail.com>"]
-description = "Safe, no_std bit manipulation around a single Bits<T> newtype: checked APIs, BMI2-accelerated gather/scatter, Morton (Z-order) curves, zero runtime dependencies."
+description = "High-performance, safe, no_std bit manipulation around a single Bits<T> newtype: checked APIs, BMI2-accelerated gather/scatter, Morton (Z-order) curves, zero runtime dependencies."
 license = "MIT"
 repository = "https://github.com/keon/bitkit"
 documentation = "https://docs.rs/bitkit"
