@@ -4,7 +4,9 @@
 [![Docs.rs](https://docs.rs/bitkit/badge.svg)](https://docs.rs/bitkit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
-> **Bit manipulation that reads like the comment you'd have to write next to it.**
+> High-performance, width-aware bit manipulation around a single `Bits<T>` newtype.
+
+Common bit-twiddling idioms get a typed, named, checked equivalent:
 
 ```rust
 // before                                       // after
@@ -16,26 +18,25 @@ x & x.wrapping_neg()                            Bits::<u32>::new(x).isolate_lowe
 unsafe { _pext_u32(x, mask) }                   Bits::<u32>::new(x).gather(mask.into())
 ```
 
-One `Bits<T>` newtype. One `Result<_, BitError>` for everything fallible.
-No `unsafe` in your code. No panics on bad indices.  And — on x86-64 BMI2 —
-the `gather` / `scatter` methods above lower to a **single hardware instruction**.
+## Why bitkit
 
-## Highlights
-
-- **One newtype, one error model, one range convention.** Every bit
-  operation is a method on `Bits<T>` returning `Result<_, BitError>`,
-  accepting any `Range<u32>` or `(u32, u32)` tuple.
-- **Hardware-accelerated `gather` / `scatter`** (PEXT/PDEP on x86-64
-  BMI2) with a portable SWAR fallback. The safe wrapper measures within
-  **0.2 ns** of the raw unsafe [`bitintr`](https://crates.io/crates/bitintr)
-  crate on capable hosts.
-- **Morton (Z-order) curves** in a dedicated module — **83× faster** than
-  [`morton-encoding`](https://crates.io/crates/morton-encoding) on Intel
-  BMI2, **8.4× faster** even on portable SWAR. See [BENCHMARKS.md](BENCHMARKS.md).
-- **`no_std`, zero runtime dependencies, no `unsafe`** in the default
-  build path (one contained internal module uses BMI2 intrinsics).
-- **`const fn` everywhere it can be.**
-- **MSRV 1.74.**
+- **Safer.** No panics on out-of-range bit indexes, no silent
+  truncation. Every fallible operation returns `Result<_, BitError>`,
+  so you can `?`-propagate naturally.
+- **Faster on modern hardware.** On x86-64 with BMI2 (Intel Haswell or
+  newer, AMD Zen 3 or newer), `gather` and `scatter` compile down to a
+  single instruction (`PEXT` / `PDEP`); on other targets they fall back
+  to a portable, safe loop. Performance is measured at parity with raw
+  `unsafe` BMI2 wrappers — see [BENCHMARKS.md](BENCHMARKS.md).
+- **Easier to read in review.** Names like `isolate_lowest_set_bit`
+  describe what the trick does instead of obscuring it as `x & -x`.
+- **Embedded-friendly.** `#![no_std]`, zero runtime dependencies, MSRV
+  Rust 1.74. The only `unsafe` in the crate lives in one isolated
+  internal module that uses BMI2 intrinsics.
+- **Built-in spatial indexing.** The `bitkit::morton` module ships
+  Morton (Z-order) curve encode and decode for quadtrees, GPU textures,
+  and range queries — **83× faster** than the `morton-encoding` crate
+  on BMI2 hardware and 8.4× faster on portable SWAR.
 
 ## Install
 
@@ -44,7 +45,7 @@ the `gather` / `scatter` methods above lower to a **single hardware instruction*
 bitkit = "3"
 ```
 
-`no_std`:
+For `no_std`:
 
 ```toml
 bitkit = { version = "3", default-features = false }
@@ -53,6 +54,9 @@ bitkit = { version = "3", default-features = false }
 ## What it looks like
 
 ### Bit fields
+
+Extract, insert, or replace a contiguous run of bits using a Rust
+`Range` (or a `(start, end)` tuple):
 
 ```rust
 use bitkit::prelude::*;
@@ -68,32 +72,42 @@ let packed  = Bits::<u8>::new(0)
 
 ### Iterators
 
+Walk the set bits, the zero bits, or every subset of a mask:
+
 ```rust
 let mask = Bits::<u32>::new(0b1011);
 let indexes: Vec<u32> = mask.set_bits().collect();   // [0, 1, 3]
 
-// All subsets of a bitmask, in O(2^popcount) time
+// Every subset of a bitmask, in 2^popcount(mask) steps:
 for subset in mask.submasks() { /* ... */ }
 ```
 
 ### Binary protocol parsing
 
+`bitkit::bytes` reads endian-aware integers from a `&[u8]`; `Bits::extract`
+peels off the fields:
+
 ```rust
 let buf = [0x12, 0x34, 0x56, 0x78];
 let len    = bitkit::bytes::read_u16_be(&buf)?;        // 0x1234
-let flags  = Bits::<u8>::new(buf[0]).extract(5..8)?; // top 3 bits
+let flags  = Bits::<u8>::new(buf[0]).extract(5..8)?;   // top 3 bits
 ```
 
-### Hardware-accelerated bit gather (PEXT)
+### Hardware-accelerated bit gather
+
+Pull a non-contiguous set of bits out of a word and pack them together,
+in one instruction on capable hardware:
 
 ```rust
 let v    = Bits::<u32>::new(0b1011_0101);
 let mask = Bits::<u32>::new(0b1001_0101);
 let packed = v.gather(mask);   // -> Bits::<u32>::new(0b1111)
-// One PEXT instruction on BMI2; portable SWAR otherwise.
 ```
 
 ### Morton (Z-order) curves
+
+Interleave the bits of two or three coordinates into a single integer
+key — the standard trick behind quadtrees and Z-order indexing:
 
 ```rust
 let z = bitkit::morton::encode_2d(1234, 5678);          // -> 37247404
@@ -101,6 +115,9 @@ assert_eq!(bitkit::morton::decode_2d(z), (1234, 5678));
 ```
 
 ### Flag sets
+
+A lightweight wrapper for ad-hoc flag manipulation where the bit
+positions come from data rather than from a fixed name list:
 
 ```rust
 const READ: u32 = 1 << 0;
@@ -113,7 +130,7 @@ assert!(f.has_all(READ | WRITE));
 
 ## What this crate is not
 
-- **Not [`bitvec`](https://crates.io/crates/bitvec).** It doesn't store
+- **Not [`bitvec`](https://crates.io/crates/bitvec).** It does not store
   arbitrary-length bit sequences or expose bit-precise references.
 - **Not [`bitflags`](https://crates.io/crates/bitflags).** `Flags<T>`
   is for *ad-hoc* manipulation where bit positions are data; for fixed
@@ -125,12 +142,12 @@ assert!(f.has_all(READ | WRITE));
 
 | module                  | purpose                                                                       |
 |-------------------------|-------------------------------------------------------------------------------|
-| [`Bits<T>`]             | The primary type: bit ops, masks, fields, popcount, gather/scatter.           |
+| [`Bits<T>`]             | The primary type: bit queries, masks, fields, popcount, gather/scatter.       |
 | [`Flags<T>`]            | Generic flag-set newtype.                                                     |
 | [`align`]               | Power-of-two alignment over `usize`.                                          |
 | [`bytes`]               | Read/write integers from `&[u8]` with explicit endianness.                    |
 | [`morton`]              | Z-order curve encode / decode (2D, 3D).                                       |
-| [`format`]              | Allocation-free grouped-binary `Display`.                                     |
+| [`mod@format`]          | Allocation-free grouped-binary `Display`.                                     |
 | [`explain`] (feature)   | Educational metadata for common bit hacks.                                    |
 
 ## Feature flags
@@ -145,7 +162,7 @@ assert!(f.has_all(READ | WRITE));
 ## Examples
 
 ```sh
-cargo run --example bit_tricks           # classic awesome-bits / Bit Twiddling Hacks tricks
+cargo run --example bit_tricks           # classic bit-twiddling tricks
 cargo run --example ipv4_header          # parse real IPv4 header bit fields
 cargo run --example permissions          # Unix rwx permissions via Flags<u16>
 cargo run --example morton_code          # naive Z-order curve via bit interleaving
@@ -163,7 +180,7 @@ cargo run --example hamming              # Hamming weight + distance + nearest-n
 | benchmark                                            | x86 BMI2     | ARM SWAR     |
 |------------------------------------------------------|-------------:|-------------:|
 | `Bits::gather` / `scatter` vs `bitintr` (raw unsafe) | tied         | 1.6× faster  |
-| `bitkit::morton::encode_2d` vs `morton-encoding` crate | **83× faster** | **8.4× faster** |
+| `bitkit::morton::encode_2d` vs `morton-encoding`     | **83× faster** | **8.4× faster** |
 | `Bits::extract`, `Bits::count_ones` vs inline        | tied         | tied         |
 | `Bits::set_bit` vs `bitvec::set`                     | 2.0× faster  | 1.6× faster  |
 
