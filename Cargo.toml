@@ -1,0 +1,69 @@
+[package]
+name = "bits-rs"
+version = "3.2.1"
+edition = "2021"
+rust-version = "1.74"
+authors = ["Keon Kim <kwk236@gmail.com>"]
+description = "Safe, no_std bit manipulation around a single Bits<T> newtype: checked APIs, BMI2-accelerated gather/scatter, Morton (Z-order) curves, zero runtime dependencies."
+license = "MIT"
+repository = "https://github.com/keon/bits-rs"
+documentation = "https://docs.rs/bits-rs"
+homepage = "https://github.com/keon/bits-rs"
+readme = "README.md"
+keywords = ["bits", "bitwise", "bit-manipulation", "morton", "no-std"]
+categories = ["no-std", "embedded", "data-structures", "algorithms"]
+exclude = [
+    "/.omc/",
+    "/.git/",
+    "/target/",
+    "/Cargo.lock",
+    "/benches/criterion/",
+    "/.github/",
+]
+
+[lib]
+name = "bits"
+path = "src/lib.rs"
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+explain = []
+# Runtime CPU detection for hardware-accelerated gather/scatter (PEXT/PDEP).
+# Requires std. Off by default; enable when distributing pre-built binaries
+# that should pick the BMI2 path at startup on capable hosts.
+runtime-detect = ["std"]
+
+[dev-dependencies]
+proptest = "1"
+criterion = { version = "0.5", default-features = false }
+bitintr = "0.3"
+bitvec = "1"
+morton-encoding = "2"
+
+[[test]]
+name = "api"
+path = "tests/api.rs"
+
+[[test]]
+name = "properties"
+path = "tests/properties.rs"
+
+[[bench]]
+name = "gather_scatter"
+harness = false
+
+[[bench]]
+name = "primitives"
+harness = false
+
+[[bench]]
+name = "workloads"
+harness = false
+
+[package.metadata.docs.rs]
+# Build docs with everything turned on so feature-gated items render.
+all-features = true
+# Show which items are feature-gated.
+rustdoc-args = ["--cfg", "docsrs"]
