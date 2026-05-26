@@ -39,10 +39,10 @@ runs ~34× slower than the hardware instruction but still edges out
 
 | host | implementation                | median time | per-point | vs `morton-encoding` |
 |------|-------------------------------|------------:|----------:|---------------------:|
-| **x86 BMI2** | **`bits::morton::encode_2d`** | **690 ns**  | 0.67 ns   | **83×**             |
+| **x86 BMI2** | **`bitkit::morton::encode_2d`** | **690 ns**  | 0.67 ns   | **83×**             |
 | x86 BMI2     | naive 16-iter loop            | 5.82 µs     | 5.69 ns   | 9.9×                 |
 | x86 BMI2     | `morton-encoding` crate       | 57.46 µs    | 56.1 ns   | 1.0× (baseline)      |
-| **ARM SWAR** | **`bits::morton::encode_2d`** | **2.02 µs** | 1.97 ns   | **8.4×**             |
+| **ARM SWAR** | **`bitkit::morton::encode_2d`** | **2.02 µs** | 1.97 ns   | **8.4×**             |
 | ARM SWAR     | naive 16-iter loop            | 2.32 µs     | 2.27 ns   | 7.4×                 |
 | ARM SWAR     | `morton-encoding` crate       | 17.08 µs    | 16.7 ns   | 1.0×                 |
 

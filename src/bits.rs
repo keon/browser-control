@@ -9,7 +9,7 @@ use crate::{BitError, IntoBitRange};
 /// looks like a single generic surface.
 ///
 /// ```
-/// use bits::Bits;
+/// use bitkit::Bits;
 /// let x = Bits::<u32>::new(0b1011_0000);
 /// assert_eq!(x.isolate_lowest_set_bit(), Bits::new(0b0001_0000));
 /// ```
@@ -237,7 +237,7 @@ impl Bits<u32> {
     /// result (PEXT semantics). One instruction on x86_64 BMI2; SWAR fallback otherwise.
     ///
     /// ```
-    /// # use bits::Bits;
+    /// # use bitkit::Bits;
     /// let v = Bits::<u32>::new(0b1011_0101);
     /// assert_eq!(v.gather(Bits::new(0b1001_0101)).get(), 0b1111);
     /// ```
@@ -246,7 +246,7 @@ impl Bits<u32> {
     /// of `mask` (PDEP semantics). Inverse of [`gather`](Self::gather).
     ///
     /// ```
-    /// # use bits::Bits;
+    /// # use bitkit::Bits;
     /// assert_eq!(Bits::<u32>::new(0b1111).scatter(Bits::new(0b1001_0101)).get(), 0b1001_0101);
     /// ```
     #[inline] pub fn scatter(self, mask: Self) -> Self { Self(accel::pdep_u32(self.0, mask.0)) }

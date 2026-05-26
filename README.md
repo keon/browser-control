@@ -1,18 +1,18 @@
-# bits-rs
+# bitkit
 
-[![Crates.io](https://img.shields.io/crates/v/bits-rs.svg)](https://crates.io/crates/bits-rs)
-[![Docs.rs](https://docs.rs/bits-rs/badge.svg)](https://docs.rs/bits-rs)
+[![Crates.io](https://img.shields.io/crates/v/bitkit.svg)](https://crates.io/crates/bitkit)
+[![Docs.rs](https://docs.rs/bitkit/badge.svg)](https://docs.rs/bitkit)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](#license)
 
 > **Bit manipulation that reads like the comment you'd have to write next to it.**
 
 ```rust
 // before                                       // after
-(addr + align - 1) & !(align - 1)               bits::align::up(addr, align)?
+(addr + align - 1) & !(align - 1)               bitkit::align::up(addr, align)?
 (byte >> 4) & 0b1111                            Bits::<u8>::new(byte).extract(4..8)?
 (x >> n) & 1 == 1                               Bits::<u32>::new(x).has_bit(n)?
 x & x.wrapping_neg()                            Bits::<u32>::new(x).isolate_lowest_set_bit()
-((hi as u32) << 16) | (y as u32)                bits::morton::encode_2d(hi, y)
+((hi as u32) << 16) | (y as u32)                bitkit::morton::encode_2d(hi, y)
 unsafe { _pext_u32(x, mask) }                   Bits::<u32>::new(x).gather(mask.into())
 ```
 
@@ -41,13 +41,13 @@ the `gather` / `scatter` methods above lower to a **single hardware instruction*
 
 ```toml
 [dependencies]
-bits-rs = "3"
+bitkit = "3"
 ```
 
 `no_std`:
 
 ```toml
-bits-rs = { version = "3", default-features = false }
+bitkit = { version = "3", default-features = false }
 ```
 
 ## What it looks like
@@ -55,7 +55,7 @@ bits-rs = { version = "3", default-features = false }
 ### Bit fields
 
 ```rust
-use bits::prelude::*;
+use bitkit::prelude::*;
 
 let header = Bits::<u8>::new(0b0100_0101);
 let version = header.extract(4..8)?; // -> Bits::<u8>::new(0b0100)
@@ -80,7 +80,7 @@ for subset in mask.submasks() { /* ... */ }
 
 ```rust
 let buf = [0x12, 0x34, 0x56, 0x78];
-let len    = bits::bytes::read_u16_be(&buf)?;        // 0x1234
+let len    = bitkit::bytes::read_u16_be(&buf)?;        // 0x1234
 let flags  = Bits::<u8>::new(buf[0]).extract(5..8)?; // top 3 bits
 ```
 
@@ -96,8 +96,8 @@ let packed = v.gather(mask);   // -> Bits::<u32>::new(0b1111)
 ### Morton (Z-order) curves
 
 ```rust
-let z = bits::morton::encode_2d(1234, 5678);          // -> 37247404
-assert_eq!(bits::morton::decode_2d(z), (1234, 5678));
+let z = bitkit::morton::encode_2d(1234, 5678);          // -> 37247404
+assert_eq!(bitkit::morton::decode_2d(z), (1234, 5678));
 ```
 
 ### Flag sets
@@ -149,7 +149,7 @@ cargo run --example bit_tricks           # classic awesome-bits / Bit Twiddling 
 cargo run --example ipv4_header          # parse real IPv4 header bit fields
 cargo run --example permissions          # Unix rwx permissions via Flags<u16>
 cargo run --example morton_code          # naive Z-order curve via bit interleaving
-cargo run --example morton_pdep          # PDEP-accelerated Morton via bits::morton
+cargo run --example morton_pdep          # PDEP-accelerated Morton via bitkit::morton
 cargo run --example subset_dp            # subset enumeration with Bits::submasks
 cargo run --example chess_knight_moves   # bitboard knight-attack generation
 cargo run --example bloom_filter         # Bloom filter on a Vec<u64> bitmap
@@ -163,7 +163,7 @@ cargo run --example hamming              # Hamming weight + distance + nearest-n
 | benchmark                                            | x86 BMI2     | ARM SWAR     |
 |------------------------------------------------------|-------------:|-------------:|
 | `Bits::gather` / `scatter` vs `bitintr` (raw unsafe) | tied         | 1.6× faster  |
-| `bits::morton::encode_2d` vs `morton-encoding` crate | **83× faster** | **8.4× faster** |
+| `bitkit::morton::encode_2d` vs `morton-encoding` crate | **83× faster** | **8.4× faster** |
 | `Bits::extract`, `Bits::count_ones` vs inline        | tied         | tied         |
 | `Bits::set_bit` vs `bitvec::set`                     | 2.0× faster  | 1.6× faster  |
 

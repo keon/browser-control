@@ -3,12 +3,12 @@
 //! Width-aware bit manipulation around a single [`Bits<T>`] newtype.
 //!
 //! ```
-//! use bits::prelude::*;
+//! use bitkit::prelude::*;
 //! let x = Bits::<u32>::new(0b1011_0000);
 //! assert_eq!(x.isolate_lowest_set_bit(), Bits::new(0b0001_0000));
 //! assert_eq!(x.set_bit(0)?,  Bits::new(0b1011_0001));
 //! assert_eq!(x.extract(1..4)?, Bits::new(0b000));
-//! # Ok::<(), bits::BitError>(())
+//! # Ok::<(), bitkit::BitError>(())
 //! ```
 //!
 //! ## Modules
@@ -114,7 +114,7 @@ impl IntoBitRange for (u32, u32) {
 /// for *ad hoc* flag manipulation where bit positions are data.
 ///
 /// ```
-/// use bits::Flags;
+/// use bitkit::Flags;
 /// const READ: u32 = 1 << 0;
 /// const WRITE: u32 = 1 << 1;
 /// let mut f = Flags::<u32>::empty();
@@ -166,7 +166,7 @@ impl_flags!(u8, u16, u32, u64, u128, usize);
 // Prelude
 // ---------------------------------------------------------------------------
 
-/// `use bits::prelude::*;` to import the common types.
+/// `use bitkit::prelude::*;` to import the common types.
 pub mod prelude {
     pub use crate::{BitError, Bits, Flags, IntoBitRange};
 }

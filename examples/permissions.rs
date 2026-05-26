@@ -2,7 +2,7 @@
 //!
 //! Run: `cargo run --example permissions`
 
-use bits::Flags;
+use bitkit::Flags;
 
 // rwxrwxrwx mapped onto a u16.
 const X_OTHER: u16 = 1 << 0;

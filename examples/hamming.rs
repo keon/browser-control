@@ -4,7 +4,7 @@
 //!
 //! Run: `cargo run --example hamming`
 
-use bits::prelude::*;
+use bitkit::prelude::*;
 
 fn hamming_weight(x: u64) -> u32 {
     Bits::<u64>::new(x).count_ones()

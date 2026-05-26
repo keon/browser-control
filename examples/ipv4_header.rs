@@ -2,7 +2,7 @@
 //!
 //! Run:  `cargo run --example ipv4_header`
 
-use bits::{bytes, prelude::*};
+use bitkit::{bytes, prelude::*};
 
 fn main() -> Result<(), BitError> {
     // A real IPv4 header (20 bytes): GET request to 8.8.8.8, identification

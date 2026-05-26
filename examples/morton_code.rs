@@ -4,7 +4,7 @@
 //!
 //! Run: `cargo run --example morton_code`
 
-use bits::{format::grouped_binary, prelude::*};
+use bitkit::{format::grouped_binary, prelude::*};
 
 fn morton_encode(x: u16, y: u16) -> u32 {
     let mut out = Bits::<u32>::new(0);

@@ -5,7 +5,7 @@
 
 #![allow(clippy::manual_swap)]   // the example *demonstrates* the XOR swap trick
 
-use bits::{format::grouped_binary, prelude::*};
+use bitkit::{format::grouped_binary, prelude::*};
 
 fn main() -> Result<(), BitError> {
     let line = |label: &str, x: Bits<u32>| {

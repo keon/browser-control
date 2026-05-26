@@ -1,6 +1,6 @@
 //! Property tests, parameterized over u8/u16/u32/u64/u128/usize.
 
-use bits::prelude::*;
+use bitkit::prelude::*;
 use proptest::prelude::*;
 
 macro_rules! per_width {
@@ -114,7 +114,7 @@ proptest! {
     #[test]
     fn align_up_invariants(value: usize, log_a in 0u32..16) {
         let a = 1usize << log_a;
-        match bits::align::up(value, a) {
+        match bitkit::align::up(value, a) {
             Ok(r) => {
                 prop_assert!(r >= value);
                 prop_assert_eq!(r % a, 0);
@@ -127,22 +127,22 @@ proptest! {
     #[test]
     fn align_down_invariants(value: usize, log_a in 0u32..16) {
         let a = 1usize << log_a;
-        let r = bits::align::down(value, a).unwrap();
+        let r = bitkit::align::down(value, a).unwrap();
         prop_assert!(r <= value && r % a == 0 && value - r < a);
     }
 
     #[test]
     fn bytes_roundtrip_u32_be(v: u32) {
         let mut buf = [0u8; 4];
-        bits::bytes::write_u32_be(&mut buf, v).unwrap();
-        prop_assert_eq!(bits::bytes::read_u32_be(&buf).unwrap(), v);
+        bitkit::bytes::write_u32_be(&mut buf, v).unwrap();
+        prop_assert_eq!(bitkit::bytes::read_u32_be(&buf).unwrap(), v);
     }
 
     #[test]
     fn bytes_roundtrip_u128_le(v: u128) {
         let mut buf = [0u8; 16];
-        bits::bytes::write_u128_le(&mut buf, v).unwrap();
-        prop_assert_eq!(bits::bytes::read_u128_le(&buf).unwrap(), v);
+        bitkit::bytes::write_u128_le(&mut buf, v).unwrap();
+        prop_assert_eq!(bitkit::bytes::read_u128_le(&buf).unwrap(), v);
     }
 }
 
@@ -227,19 +227,19 @@ proptest! {
 
     #[test]
     fn morton_2d_roundtrip(x: u16, y: u16) {
-        let z = bits::morton::encode_2d(x, y);
-        prop_assert_eq!(bits::morton::decode_2d(z), (x, y));
+        let z = bitkit::morton::encode_2d(x, y);
+        prop_assert_eq!(bitkit::morton::decode_2d(z), (x, y));
     }
 
     #[test]
     fn morton_2d_u64_roundtrip(x: u32, y: u32) {
-        let z = bits::morton::encode_2d_u64(x, y);
-        prop_assert_eq!(bits::morton::decode_2d_u64(z), (x, y));
+        let z = bitkit::morton::encode_2d_u64(x, y);
+        prop_assert_eq!(bitkit::morton::decode_2d_u64(z), (x, y));
     }
 
     #[test]
     fn morton_3d_roundtrip(x in 0u16..1024, y in 0u16..1024, z in 0u16..1024) {
-        let m = bits::morton::encode_3d(x, y, z);
-        prop_assert_eq!(bits::morton::decode_3d(m), (x, y, z));
+        let m = bitkit::morton::encode_3d(x, y, z);
+        prop_assert_eq!(bitkit::morton::decode_3d(m), (x, y, z));
     }
 }

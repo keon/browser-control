@@ -1,14 +1,14 @@
 [package]
-name = "bits-rs"
+name = "bitkit"
 version = "3.2.1"
 edition = "2021"
 rust-version = "1.74"
 authors = ["Keon Kim <kwk236@gmail.com>"]
 description = "Safe, no_std bit manipulation around a single Bits<T> newtype: checked APIs, BMI2-accelerated gather/scatter, Morton (Z-order) curves, zero runtime dependencies."
 license = "MIT"
-repository = "https://github.com/keon/bits-rs"
-documentation = "https://docs.rs/bits-rs"
-homepage = "https://github.com/keon/bits-rs"
+repository = "https://github.com/keon/bitkit"
+documentation = "https://docs.rs/bitkit"
+homepage = "https://github.com/keon/bitkit"
 readme = "README.md"
 keywords = ["bits", "bitwise", "bit-manipulation", "morton", "no-std"]
 categories = ["no-std", "embedded", "data-structures", "algorithms"]
@@ -22,7 +22,7 @@ exclude = [
 ]
 
 [lib]
-name = "bits"
+name = "bitkit"
 path = "src/lib.rs"
 
 [features]

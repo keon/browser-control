@@ -7,7 +7,7 @@
 //!
 //! Run: `cargo run --example chess_knight_moves`
 
-use bits::{format::grouped_binary, prelude::*};
+use bitkit::{format::grouped_binary, prelude::*};
 
 fn knight_attacks(sq: u32) -> Bits<u64> {
     // A knight at square `sq` can jump in 8 directions; we mask each

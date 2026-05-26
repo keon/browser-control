@@ -11,7 +11,7 @@
 use bitvec::prelude::*;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use bits::Bits;
+use bitkit::Bits;
 
 fn bench_set_bit(c: &mut Criterion) {
     let idxs: Vec<u32> = (0..1024u32).map(|i| i % 32).collect();

@@ -13,7 +13,7 @@
 //! ## Example
 //!
 //! ```
-//! use bits::morton;
+//! use bitkit::morton;
 //! assert_eq!(morton::encode_2d(1234, 5678), 37247404);
 //! assert_eq!(morton::decode_2d(37247404), (1234, 5678));
 //! ```

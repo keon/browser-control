@@ -14,7 +14,7 @@
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use bits::{bytes, Bits};
+use bitkit::{bytes, Bits};
 
 // =========================================================================
 // 1. Held–Karp TSP DP over a 15-city distance matrix.

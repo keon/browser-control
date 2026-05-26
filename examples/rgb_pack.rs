@@ -6,7 +6,7 @@
 //!
 //! Run: `cargo run --example rgb_pack`
 
-use bits::prelude::*;
+use bitkit::prelude::*;
 
 fn pack_rgba8888(r: u8, g: u8, b: u8, a: u8) -> u32 {
     Bits::<u32>::new(0)

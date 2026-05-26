@@ -5,7 +5,7 @@
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use bits::Bits;
+use bitkit::Bits;
 use bitintr::{Pdep, Pext};
 
 // SWAR baseline (taken from src/accel.rs portable fallback, semantics-equivalent).

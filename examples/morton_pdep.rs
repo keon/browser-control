@@ -1,4 +1,4 @@
-//! Morton (Z-order) codes via the high-level `bits::morton` module.
+//! Morton (Z-order) codes via the high-level `bitkit::morton` module.
 //!
 //! Underneath, each call uses `Bits::scatter` / `gather` which compile to
 //! a single PDEP/PEXT instruction on x86_64 BMI2 (Intel ≥ Haswell, AMD ≥
@@ -6,7 +6,7 @@
 //!
 //! Run:  `cargo run --example morton_pdep`
 
-use bits::morton;
+use bitkit::morton;
 
 fn main() {
     println!("4x4 quadrant of 2D Morton codes:");

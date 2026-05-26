@@ -7,7 +7,7 @@
 //!
 //! Run: `cargo run --example subset_dp`
 
-use bits::{format::grouped_binary, prelude::*};
+use bitkit::{format::grouped_binary, prelude::*};
 
 fn min_subset_for_sum(weights: &[u32], target: u32) -> Option<u8> {
     assert!(weights.len() <= 8);

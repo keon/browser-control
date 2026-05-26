@@ -4,7 +4,7 @@
 //! implements [`Binary`](core::fmt::Binary).
 //!
 //! ```
-//! use bits::{format::grouped_binary, Bits};
+//! use bitkit::{format::grouped_binary, Bits};
 //! assert_eq!(format!("{}", grouped_binary(Bits::<u8>::new(0xA5), 4)), "1010_0101");
 //! ```
 

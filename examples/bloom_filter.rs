@@ -7,7 +7,7 @@
 
 #![allow(clippy::unusual_byte_groupings)]
 
-use bits::prelude::*;
+use bitkit::prelude::*;
 
 struct Bloom {
     bits: Vec<u64>, // each u64 holds 64 slots

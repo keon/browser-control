@@ -1,7 +1,7 @@
 //! API surface + deterministic examples.
 
-use bits::prelude::*;
-use bits::{align, bytes, format::grouped_binary};
+use bitkit::prelude::*;
+use bitkit::{align, bytes, format::grouped_binary};
 
 #[test]
 fn width_constants() {
@@ -150,19 +150,19 @@ fn error_display() {
 #[cfg(feature = "explain")]
 #[test]
 fn explanations() {
-    assert_eq!(bits::explain::isolate_lowest_set_bit().formula, "x & -x");
+    assert_eq!(bitkit::explain::isolate_lowest_set_bit().formula, "x & -x");
 }
 
 #[test]
 fn const_friendly_indices_forms() {
     // These compile in const context — verify by using them in a const block.
-    const M: bits::Bits<u32> = match bits::Bits::<u32>::range_mask_indices(2, 5) {
+    const M: bitkit::Bits<u32> = match bitkit::Bits::<u32>::range_mask_indices(2, 5) {
         Ok(m) => m, Err(_) => panic!(),
     };
     assert_eq!(M.get(), 0b0001_1100);
 
-    const X: bits::Bits<u8> = bits::Bits::<u8>::new(0b1101_0110);
-    const F: bits::Bits<u8> = match X.extract_indices(1, 4) {
+    const X: bitkit::Bits<u8> = bitkit::Bits::<u8>::new(0b1101_0110);
+    const F: bitkit::Bits<u8> = match X.extract_indices(1, 4) {
         Ok(v) => v, Err(_) => panic!(),
     };
     assert_eq!(F.get(), 0b011);
@@ -170,7 +170,7 @@ fn const_friendly_indices_forms() {
 
 #[test]
 fn const_get() {
-    const VAL: u32 = bits::Bits::<u32>::new(42).get();
+    const VAL: u32 = bitkit::Bits::<u32>::new(42).get();
     assert_eq!(VAL, 42);
 }
 
@@ -233,7 +233,7 @@ fn reverse_bits_and_blsmsk_and_bzhi() {
 
 #[test]
 fn morton_2d_and_3d() {
-    use bits::morton;
+    use bitkit::morton;
     // 2D round-trip
     for (x, y) in [(0u16, 0u16), (1, 0), (0, 1), (1234, 5678), (u16::MAX, u16::MAX)] {
         let z = morton::encode_2d(x, y);
