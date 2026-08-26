@@ -30,7 +30,7 @@ import sys
 import urllib.error
 import urllib.request
 
-API = "https://api.browser-use.com/api/v3"
+API = "https://api.browser-use.com/api/v4"
 
 
 def _headers() -> dict[str, str]:
