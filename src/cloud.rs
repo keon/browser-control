@@ -45,7 +45,7 @@ fn preset(name: &str) -> Result<Provider> {
     let p = match name {
         "browser-use" | "browseruse" | "bu" => Provider {
             name: s("browser-use"),
-            base: s("https://api.browser-use.com/api/v3"),
+            base: s("https://api.browser-use.com/api/v4"),
             auth_header: s("X-Browser-Use-API-Key"),
             key_env: s("BROWSER_USE_API_KEY"),
             key: String::new(),

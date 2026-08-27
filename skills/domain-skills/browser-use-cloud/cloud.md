@@ -5,11 +5,11 @@
 > `steel`, `hyperbrowser`, `browserbase`). This page is the provider-specific
 > REST reference for Browser Use; see the README for the general provider model.
 
-`https://api.browser-use.com/api/v3` (REST). All five endpoints below were
-exercised end-to-end on 2026-05-05 with a real `BROWSER_USE_API_KEY`; the
-companion script `cleanup-zombies.py` next to this file *is* the
-field-test — running it lists active browsers and stops zombies via the
-same wire calls browser-control uses internally.
+`https://api.browser-use.com/api/v4` (REST). V4 keeps the request fields and
+the response fields this integration reads (`id`, `cdpUrl`, profile lists, and
+lifecycle/cost fields). The companion script `cleanup-zombies.py` next to this
+file is the field test: running it lists active browsers and stops zombies
+through the same V4 routes browser-control uses internally.
 
 This skill is for users who already start cloud browsers via
 `start_remote_daemon()` and want to manage the surrounding lifecycle —
@@ -34,8 +34,8 @@ it — there are no organisation-level admin endpoints on the public API.
 
 ## Endpoint reference
 
-All paths are under `https://api.browser-use.com/api/v3`. Verified status
-codes and shapes from 2026-05-05 below.
+All paths are under `https://api.browser-use.com/api/v4`. The request and
+response shapes below match the current V4 OpenAPI schema.
 
 ### `POST /browsers` — provision a cloud browser
 
@@ -201,7 +201,10 @@ real Chrome once, then retry.
 
 ## Provenance
 
-Live-tested 2026-05-05 against `https://api.browser-use.com/api/v3`:
+The routes were live-tested against V3 on 2026-05-05. On 2026-08-26, the V4
+OpenAPI schema was checked to confirm every route, request field, and response
+field used above. V4 can add or remove fields the integration does not read;
+no paid browser was started for this schema-only check.
 
 | Endpoint | Method | Status | Notes |
 |---|---|---|---|
